@@ -38,7 +38,7 @@
 -export([field_name/1, field_type/1, field_attrs/1]).
 
 %%% API for schema creation.
--export([create_schema/0, create_schema/1, create_schema/2]).
+-export([create_schema/0, create_schema/1, create_schema/2, get_field_names/1]).
 
 %%% API for standard CRUD functions.
 -export([persist/2, delete/2, delete_by/2, delete_all/1]).
@@ -234,6 +234,10 @@ docs_wakeup(DocName, Docs) ->
     end,
     Docs
   )).
+
+-spec get_field_names(#sumo_schema{}) -> [sumo_field_name()].
+get_field_names(#sumo_schema{fields = Fields}) ->
+  [ Name || #sumo_field{name = Name} <- Fields].
 
 %% @doc Returns the value of a field from a sumo_doc.
 -spec get_field(sumo_field_name(), #sumo_doc{}) -> term().

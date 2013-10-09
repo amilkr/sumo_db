@@ -192,11 +192,13 @@ find_by(DocName, Conditions, Limit, Offset, State) ->
     {"", [], []},
     Conditions
   ),
+  FieldNames = string:join([ escape(atom_to_list(F)) || F <- sumo:get_field_names(sumo:get_schema(DocName))], ","),
   StatementName = prepare(DocName, list_to_atom("find_by" ++ PreStatementName), fun() ->
     Sqls = [[escape(atom_to_list(K)), "=?"] || K <- DocFields],
-    % Select * is not good..
     Sql1 =[
-      "SELECT * FROM ", escape(atom_to_list(DocName)),
+      "SELECT ",
+      FieldNames,
+      " FROM ", escape(atom_to_list(DocName)),
       " WHERE ", string:join(Sqls, " AND ")
     ],
     Sql2 = case Limit of
