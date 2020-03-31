@@ -1,6 +1,6 @@
 %%% @doc Readers can vote posts.
 %%%
-%%% Copyright 2012 Marcelo Gornstein &lt;marcelog@@gmail.com&gt;
+%%% Copyright 2012 Inaka &lt;hello@inaka.net&gt;
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
 %%% you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%% @end
-%%% @copyright Marcelo Gornstein <marcelog@gmail.com>
-%%% @author Marcelo Gornstein <marcelog@gmail.com>
+%%% @copyright Inaka <hello@inaka.net>
 %%%
 -module(blog_vote).
 -author("Marcelo Gornstein <marcelog@gmail.com>").
--github("https://github.com/marcelog").
--homepage("http://marcelog.github.com/").
+-github("https://github.com/inaka").
 -license("Apache License 2.0").
 
--include_lib("include/sumo_doc.hrl").
-
--behavior(sumo_doc).
+-behaviour(sumo_doc).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Exports.
@@ -39,7 +35,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -type vote() :: proplists:proplist().
 -type id() :: pos_integer().
--export_type([vote/0]).
+-export_type([vote/0, id/0]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public API.
@@ -50,7 +46,7 @@ new(ReaderId, PostId) ->
   create(undefined, ReaderId, PostId).
 
 %% @doc Returns a new vote (internal).
--spec create(id(), blog_reader:id(), blog_post:id()) -> vote().
+-spec create(undefined|id(), blog_reader:id(), blog_post:id()) -> vote().
 create(Id, ReaderId, PostId) ->
   [{id, Id}, {reader_id, ReaderId}, {post_id, PostId}].
 
@@ -77,28 +73,23 @@ reader_id(Vote) when is_list(Vote) ->
 get(Key, Vote) when is_atom(Key), is_list(Vote) ->
   proplists:get_value(Key, Vote).
 
-%% @doc Generically set an attribute of the given vote.
-%-spec set(atom(), term(), vote()) -> proplists:proplist().
-%set(Key, Value, Vote) when is_atom(Key), is_list(Vote) ->
-%  lists:keyreplace(Key, 1, Vote, {Key, Value}).
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% sumo behavior follows.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% @doc Part of the sumo_doc behavior.
--spec sumo_wakeup(proplists:proplist()) -> vote().
+-spec sumo_wakeup(sumo:model()) -> vote().
 sumo_wakeup(Data) ->
-  Data.
+  maps:to_list(Data).
 
 %% @doc Part of the sumo_doc behavior.
--spec sumo_sleep(vote()) -> proplists:proplist().
+-spec sumo_sleep(vote()) -> sumo:model().
 sumo_sleep(Vote) ->
-  Vote.
+  maps:from_list(Vote).
 
 %% @doc Part of the sumo_doc behavior.
--spec sumo_schema() -> #sumo_schema{}.
+-spec sumo_schema() -> sumo:schema().
 sumo_schema() ->
-  sumo:new_schema(?MODULE, [
+  sumo:new_schema(vote, [
     sumo:new_field(id, integer, [not_null, auto_increment, id]),
     sumo:new_field(post_id, integer),
     sumo:new_field(reader_id, integer)

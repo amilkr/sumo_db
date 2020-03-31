@@ -1,6 +1,6 @@
 %%% @doc A blog post author.
 %%%
-%%% Copyright 2012 Marcelo Gornstein &lt;marcelog@@gmail.com&gt;
+%%% Copyright 2012 Inaka &lt;hello@inaka.net&gt;
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
 %%% you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%% @end
-%%% @copyright Marcelo Gornstein <marcelog@gmail.com>
-%%% @author Marcelo Gornstein <marcelog@gmail.com>
+%%% @copyright Inaka <hello@inaka.net>
 %%%
 -module(blog_author).
 -author("Marcelo Gornstein <marcelog@gmail.com>").
--github("https://github.com/marcelog").
--homepage("http://marcelog.github.com/").
+-github("https://github.com/inaka").
 -license("Apache License 2.0").
 
--include_lib("include/sumo_doc.hrl").
-
--behavior(sumo_doc).
+-behaviour(sumo_doc).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Exports.
@@ -39,24 +35,24 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -type author() :: proplists:proplist().
 -type id() :: pos_integer().
--export_type([author/0]).
+-export_type([author/0, id/0]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public API.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% @doc Returns a new author.
 -spec new(string()) -> author().
-new(Name) when is_list(Name) ->
+new(Name) when is_binary(Name) ->
   create(undefined, Name, <<>>).
 
 %% @doc Returns a new author.
 -spec new(string(), binary()) -> author().
-new(Name, Photo) when is_list(Name), is_binary(Photo) ->
+new(Name, Photo) when is_binary(Name), is_binary(Photo) ->
   create(undefined, Name, Photo).
 
 %% @doc Returns a new author (internal).
--spec create(id(), string(), binary()) -> author().
-create(Id, Name, Photo) when is_list(Name), is_binary(Photo) ->
+-spec create(undefined|id(), binary(), binary()) -> author().
+create(Id, Name, Photo) when is_binary(Name), is_binary(Photo) ->
   [{id, Id}, {name, Name}, {photo, Photo}].
 
 %% @doc Returns the id of the given author.
@@ -66,7 +62,7 @@ id(Author) when is_list(Author) ->
 
 %% @doc Returns the name of the given author.
 -spec name(author()) -> string().
-name(Author) when is_list(Author) ->
+name(Author) when is_binary(Author) ->
   get(name, Author).
 
 %% @doc Returns the current author's photo.
@@ -96,19 +92,19 @@ set(Key, Value, Author) when is_atom(Key), is_list(Author) ->
 %% sumo behavior follows.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% @doc Part of the sumo_doc behavior.
--spec sumo_wakeup(proplists:proplist()) -> author().
+-spec sumo_wakeup(sumo:model()) -> author().
 sumo_wakeup(Data) ->
-  Data.
+  maps:to_list(Data).
 
 %% @doc Part of the sumo_doc behavior.
--spec sumo_sleep(author()) -> proplists:proplist().
+-spec sumo_sleep(author()) -> sumo:model().
 sumo_sleep(Author) ->
-  Author.
+  maps:from_list(Author).
 
 %% @doc Part of the sumo_doc behavior.
--spec sumo_schema() -> #sumo_schema{}.
+-spec sumo_schema() -> sumo:schema().
 sumo_schema() ->
-  sumo:new_schema(?MODULE, [
+  sumo:new_schema(author, [
     sumo:new_field(id, integer, [not_null, auto_increment, id]),
     sumo:new_field(name, string, [{length, 128}, not_null]),
     sumo:new_field(photo, binary)

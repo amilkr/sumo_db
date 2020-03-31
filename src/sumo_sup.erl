@@ -1,6 +1,7 @@
+%%% @hidden
 %%% @doc Main supervisor.
 %%%
-%%% Copyright 2012 Marcelo Gornstein &lt;marcelog@@gmail.com&gt;
+%%% Copyright 2012 Inaka &lt;hello@inaka.net&gt;
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
 %%% you may not use this file except in compliance with the License.
@@ -14,41 +15,43 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%% @end
-%%% @copyright Marcelo Gornstein <marcelog@gmail.com>
-%%% @author Marcelo Gornstein <marcelog@gmail.com>
+%%% @copyright Inaka <hello@inaka.net>
 %%%
 -module(sumo_sup).
 -author("Marcelo Gornstein <marcelog@gmail.com>").
--github("https://github.com/marcelog").
--homepage("http://marcelog.github.com/").
+-github("https://github.com/inaka").
 -license("Apache License 2.0").
 
 -behaviour(supervisor).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Exports.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% API
+%%% API
 -export([start_link/0]).
 
-%% Supervisor callbacks
+%%% Supervisor callbacks
 -export([init/1]).
 
-%% Helper macro for declaring children of supervisor
--define(CLD(I), {I, {I, start_link, []}, permanent, 5000, worker, [I]}).
--define(SUP(I), {I, {I, start_link, []}, permanent, infinity, supervisor, [I]}).
+%%%=============================================================================
+%%% API
+%%%=============================================================================
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Code starts here.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-spec start_link() -> {ok, pid()} | {error, term()}.
 start_link() ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+  supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
+%%%=============================================================================
+%%% Supervisor callbacks
+%%%=============================================================================
+
+-spec init(any()) ->
+  {ok, {supervisor:sup_flags(), [supervisor:child_spec()]}}.
 init([]) ->
-  {ok, {
-    {one_for_one, 5, 10},
-    [ ?SUP(sumo_backend_sup)
-    , ?SUP(sumo_repo_sup)
-    ]
-  }}.
+  ok = sumo_config:init(),
+  Specs = [
+    sup(sumo_backend_sup),
+    sup(sumo_store_sup),
+    sup(sumo_event_manager_sup)
+  ],
+  {ok, {{one_for_one, 5, 10}, Specs}}.
 
+%% @private
+sup(I) -> {I, {I, start_link, []}, permanent, infinity, supervisor, [I]}.

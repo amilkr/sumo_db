@@ -1,6 +1,7 @@
+%%% @hidden
 %%% @doc sumo_db application.
 %%%
-%%% Copyright 2012 Marcelo Gornstein &lt;marcelog@@gmail.com&gt;
+%%% Copyright 2012 Inaka &lt;hello@inaka.net&gt;
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
 %%% you may not use this file except in compliance with the License.
@@ -14,27 +15,26 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%% @end
-%%% @copyright Marcelo Gornstein <marcelog@gmail.com>
-%%% @author Marcelo Gornstein <marcelog@gmail.com>
+%%% @copyright Inaka <hello@inaka.net>
 %%%
 -module(sumo_app).
 -author("Marcelo Gornstein <marcelog@gmail.com>").
--github("https://github.com/marcelog").
--homepage("http://marcelog.github.com/").
+-github("https://github.com/inaka").
 -license("Apache License 2.0").
 
 -behaviour(application).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Exports.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% API
 -export([start/2, stop/1]).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Code starts here.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%=============================================================================
+%%% API
+%%%=============================================================================
+
+-spec start(term(), term()) -> {error, term()} | {ok, pid()}.
 start(_StartType, _StartArgs) ->
   sumo_sup:start_link().
 
+-spec stop(term()) -> ok.
 stop(_State) ->
   ok.

@@ -1,6 +1,6 @@
 %%% @doc A blog post.
 %%%
-%%% Copyright 2012 Marcelo Gornstein &lt;marcelog@@gmail.com&gt;
+%%% Copyright 2012 Inaka &lt;hello@inaka.net&gt;
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
 %%% you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%% @end
-%%% @copyright Marcelo Gornstein <marcelog@gmail.com>
-%%% @author Marcelo Gornstein <marcelog@gmail.com>
+%%% @copyright Inaka <hello@inaka.net>
 %%%
 -module(blog_post).
 -author("Marcelo Gornstein <marcelog@gmail.com>").
--github("https://github.com/marcelog").
--homepage("http://marcelog.github.com/").
+-github("https://github.com/inaka").
 -license("Apache License 2.0").
 
--include_lib("include/sumo_doc.hrl").
-
--behavior(sumo_doc).
+-behaviour(sumo_doc).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Exports.
@@ -39,7 +35,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -type post() :: proplists:proplist().
 -type id() :: pos_integer().
--export_type([post/0]).
+-export_type([post/0, id/0]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public API.
@@ -50,7 +46,7 @@ new(Title, Content, AuthorId) when is_list(Title), is_list(Content) ->
   create(undefined, Title, Content, AuthorId).
 
 %% @doc Returns a new post (internal).
--spec create(id(), string(), string(), blog_author:id()) -> post().
+-spec create(undefined|id(), string(), string(), blog_author:id()) -> post().
 create(Id, Title, Content, AuthorId)
   when is_list(Title), is_list(Content), is_integer(AuthorId) ->
   [{id, Id}, {title, Title}, {content, Content}, {author_id, AuthorId}].
@@ -102,33 +98,21 @@ set(Key, Value, Post) when is_atom(Key), is_list(Post) ->
 %% sumo behavior follows.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% @doc Part of the sumo_doc behavior.
--spec sumo_wakeup(proplists:proplist()) -> post().
+-spec sumo_wakeup(sumo:model()) -> post().
 sumo_wakeup(Data) ->
-  Data.
+  maps:to_list(Data).
 
 %% @doc Part of the sumo_doc behavior.
--spec sumo_sleep(post()) -> proplists:proplist().
+-spec sumo_sleep(post()) -> sumo:model().
 sumo_sleep(Post) ->
-  Post.
+  maps:from_list(Post).
 
 %% @doc Part of the sumo_doc behavior.
--spec sumo_schema() -> #sumo_schema{}.
+-spec sumo_schema() -> sumo:schema().
 sumo_schema() ->
-  sumo:new_schema(?MODULE, [
+  sumo:new_schema(post, [
     sumo:new_field(id, integer, [not_null, auto_increment, id]),
     sumo:new_field(title, string, [{length, 128}, not_null, unique]),
-    sumo:new_field(content, text),
+    sumo:new_field(content, string),
     sumo:new_field(author_id, integer, [index])
   ]).
-
-%% We don't have the extends module attribute in R16, so this was moved out from
-%% the old blog_post_repo in the example, we should allocate some time to create
-%% a proper parse transform for this.
-% -spec total_posts(sumo_schema_name(), term() ) -> {ok, {raw, pos_integer}, term()} | {ok, error, term()}.
-% count(DocName, State) ->
-%   Sql = "SELECT COUNT(1) FROM `" ++ atom_to_list(DocName) ++ "`",
-%   Result = sumo_repo_mysql:execute(Sql, State),
-%   case Result of
-%     #result_packet{rows=[[N]]} -> {ok, {raw, N}, State};
-%     _ -> {ok, error, State}
-%   end.

@@ -1,6 +1,6 @@
 %%% @doc The blog post event handler.
 %%%
-%%% Copyright 2012 Marcelo Gornstein &lt;marcelog@@gmail.com&gt;
+%%% Copyright 2012 Inaka &lt;hello@inaka.net&gt;
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
 %%% you may not use this file except in compliance with the License.
@@ -14,16 +14,14 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%% @end
-%%% @copyright Marcelo Gornstein <marcelog@gmail.com>
-%%% @author Marcelo Gornstein <marcelog@gmail.com>
+%%% @copyright Inaka <hello@inaka.net>
 %%%
 -module(blog_event_handler).
 -author("Marcelo Gornstein <marcelog@gmail.com>").
--github("https://github.com/marcelog").
--homepage("http://marcelog.github.com/").
+-github("https://github.com/inaka").
 -license("Apache License 2.0").
 
--behavior(gen_event).
+-behaviour(gen_event).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Exports.
@@ -45,24 +43,24 @@ handle_info(_Info, State) ->
 handle_call(_Request, State) ->
   {ok, not_implemented, State}.
 
-handle_event({blog_post, schema_created, []}, State) ->
+handle_event({post, schema_created, []}, State) ->
   lager:info("The blog post schema has been created"),
   {ok, State};
 
-handle_event({blog_post, deleted, [Id]}, State) ->
+handle_event({post, deleted, [Id]}, State) ->
   lager:info("The blog post ~p has been deleted", [Id]),
   {ok, State};
 
-handle_event({blog_post, deleted_all, []}, State) ->
+handle_event({post, deleted_all, []}, State) ->
   lager:info("All blog posts entries have been deleted"),
   {ok, State};
 
-handle_event({blog_post, created, [Entity]}, State) ->
+handle_event({post, created, [Entity]}, State) ->
   Id = proplists:get_value(id, Entity),
   lager:info("Blog post ~p created", [Id]),
   {ok, State};
 
-handle_event({blog_post, updated, [Entity]}, State) ->
+handle_event({post, updated, [Entity]}, State) ->
   Id = proplists:get_value(id, Entity),
   lager:info("Blog post ~p updated", [Id]),
   {ok, State};

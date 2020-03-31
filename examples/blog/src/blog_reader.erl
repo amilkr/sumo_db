@@ -1,6 +1,6 @@
 %%% @doc A blog reader (user).
 %%%
-%%% Copyright 2012 Marcelo Gornstein &lt;marcelog@@gmail.com&gt;
+%%% Copyright 2012 Inaka &lt;hello@inaka.net&gt;
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
 %%% you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%% @end
-%%% @copyright Marcelo Gornstein <marcelog@gmail.com>
-%%% @author Marcelo Gornstein <marcelog@gmail.com>
+%%% @copyright Inaka <hello@inaka.net>
 %%%
 -module(blog_reader).
 -author("Marcelo Gornstein <marcelog@gmail.com>").
--github("https://github.com/marcelog").
--homepage("http://marcelog.github.com/").
+-github("https://github.com/inaka").
 -license("Apache License 2.0").
 
--include_lib("include/sumo_doc.hrl").
-
--behavior(sumo_doc).
+-behaviour(sumo_doc).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Exports.
@@ -40,7 +36,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -type reader() :: proplists:proplist().
 -type id() :: pos_integer().
--export_type([reader/0]).
+-export_type([reader/0, id/0]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public API.
@@ -51,7 +47,7 @@ new(Name, Email) when is_list(Name), is_list(Email) ->
   create(undefined, Name, Email).
 
 %% @doc Returns a new reader (internal).
--spec create(id(), string(), string()) -> reader().
+-spec create(undefined|id(), string(), string()) -> reader().
 create(Id, Name, Email) when is_list(Name), is_list(Email) ->
   [{id, Id}, {name, Name}, {email, Email}].
 
@@ -79,7 +75,7 @@ update_email(Email, Reader) when is_list(Email) ->
 %% Private functions.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% @doc Generically returns an attibute of the given reader.
--spec get(atom(), reader()) -> reader().
+-spec get(atom(), reader()) -> id() | string().
 get(Key, Reader) when is_atom(Key), is_list(Reader) ->
   proplists:get_value(Key, Reader).
 
@@ -92,19 +88,19 @@ set(Key, Value, Reader) when is_atom(Key), is_list(Reader) ->
 %% sumo behavior follows.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% @doc Part of the sumo_doc behavior.
--spec sumo_wakeup(proplists:proplist()) -> reader().
+-spec sumo_wakeup(sumo:model()) -> reader().
 sumo_wakeup(Data) ->
-  Data.
+  maps:to_list(Data).
 
 %% @doc Part of the sumo_doc behavior.
--spec sumo_sleep(reader()) -> proplists:proplist().
+-spec sumo_sleep(reader()) -> sumo:model().
 sumo_sleep(Reader) ->
-  Reader.
+  maps:from_list(Reader).
 
 %% @doc Part of the sumo_doc behavior.
--spec sumo_schema() -> #sumo_schema{}.
+-spec sumo_schema() -> sumo:schema().
 sumo_schema() ->
-  sumo:new_schema(?MODULE, [
+  sumo:new_schema(reader, [
     sumo:new_field(id, integer, [not_null, auto_increment, id]),
     sumo:new_field(name, string, [{length, 128}, not_null, unique]),
     sumo:new_field(email, string, [{length, 128}, index])

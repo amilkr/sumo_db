@@ -1,7 +1,7 @@
-%%% @doc Implement this behavior on your entities so the repositories can
+%%% @doc Implement this behavior on your entities so the stores can
 %%% properly (un)marshall them.
 %%%
-%%% Copyright 2012 Marcelo Gornstein &lt;marcelog@@gmail.com&gt;
+%%% Copyright 2012 Inaka &lt;hello@inaka.net&gt;
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
 %%% you may not use this file except in compliance with the License.
@@ -15,28 +15,14 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%% @end
-%%% @copyright Marcelo Gornstein <marcelog@gmail.com>
-%%% @author Marcelo Gornstein <marcelog@gmail.com>
+%%% @copyright Inaka <hello@inaka.net>
 %%%
 -module(sumo_doc).
 -author("Marcelo Gornstein <marcelog@gmail.com>").
--github("https://github.com/marcelog").
--homepage("http://marcelog.github.com/").
+-github("https://github.com/inaka").
 -license("Apache License 2.0").
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Exports.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--export([behaviour_info/1]).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Code starts here.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% @doc Returns all behavior callbacks.
--spec behaviour_info(callbacks) -> proplists:proplist()|undefined.
-behaviour_info(callbacks) ->
-  [{sumo_schema,0}, {sumo_wakeup,1}, {sumo_sleep,1}];
-
-behaviour_info(_Other) ->
-  undefined.
-
+%% Returns all behavior callbacks.
+-callback sumo_schema() -> sumo:schema().
+-callback sumo_wakeup(sumo:model()) -> sumo:user_doc().
+-callback sumo_sleep(sumo:user_doc()) -> sumo:model().
