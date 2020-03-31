@@ -137,7 +137,7 @@ start_link(Name, Module, Options) ->
 %% @doc Creates the schema of the given docs in the given store name.
 -spec create_schema(atom(), sumo:schema()) -> ok | {error, term()}.
 create_schema(Name, Schema) ->
-  wpool:call(Name, {create_schema, Schema}).
+  wpool_call(Name, {create_schema, Schema}).
 
 %% @doc Persist the given doc with the given store name.
 -spec persist(Name, Doc) -> Res when
@@ -145,7 +145,7 @@ create_schema(Name, Schema) ->
   Doc  :: sumo_internal:doc(),
   Res  :: {ok, sumo_internal:doc()} | {error, term()}.
 persist(Name, Doc) ->
-  wpool:call(Name, {persist, Doc}).
+  wpool_call(Name, {persist, Doc}).
 
 %% @doc Deletes the docs identified by the given conditions.
 -spec delete_by(Name, DocName, Conditions) -> Res when
@@ -154,7 +154,7 @@ persist(Name, Doc) ->
   Conditions :: sumo:conditions(),
   Res        :: {ok, non_neg_integer()} | {error, term()}.
 delete_by(Name, DocName, Conditions) ->
-  wpool:call(Name, {delete_by, DocName, Conditions}).
+  wpool_call(Name, {delete_by, DocName, Conditions}).
 
 %% @doc Deletes all docs in the given store name.
 -spec delete_all(Name, DocName) -> Res when
@@ -162,7 +162,7 @@ delete_by(Name, DocName, Conditions) ->
   DocName    :: sumo:schema_name(),
   Res        :: {ok, non_neg_integer()} | {error, term()}.
 delete_all(Name, DocName) ->
-  wpool:call(Name, {delete_all, DocName}).
+  wpool_call(Name, {delete_all, DocName}).
 
 %% @doc Returns all docs from the given store name.
 -spec find_all(Name, DocName) -> Res when
@@ -170,7 +170,7 @@ delete_all(Name, DocName) ->
   DocName    :: sumo:schema_name(),
   Res        :: {ok, [sumo_internal:doc()]} | {error, term()}.
 find_all(Name, DocName) ->
-  wpool:call(Name, {find_all, DocName}).
+  wpool_call(Name, {find_all, DocName}).
 
 %% @doc
 %% Returns Limit docs starting at Offset from the given store name,
@@ -184,7 +184,7 @@ find_all(Name, DocName) ->
   Offset     :: non_neg_integer(),
   Res        :: {ok, [sumo_internal:doc()]} | {error, term()}.
 find_all(Name, DocName, SortFields, Limit, Offset) ->
-  wpool:call(Name, {find_all, DocName, SortFields, Limit, Offset}).
+  wpool_call(Name, {find_all, DocName, SortFields, Limit, Offset}).
 
 %% @doc
 %% Finds documents that match the given conditions in the given
@@ -196,7 +196,7 @@ find_all(Name, DocName, SortFields, Limit, Offset) ->
   Conditions :: sumo:conditions(),
   Res        :: {ok, [sumo_internal:doc()]} | {error, term()}.
 find_by(Name, DocName, Conditions) ->
-  wpool:call(Name, {find_by, DocName, Conditions}).
+  wpool_call(Name, {find_by, DocName, Conditions}).
 
 %% @doc
 %% Finds documents that match the given conditions in the given
@@ -210,7 +210,7 @@ find_by(Name, DocName, Conditions) ->
   Offset     :: non_neg_integer(),
   Res        :: {ok, [sumo_internal:doc()]} | {error, term()}.
 find_by(Name, DocName, Conditions, Limit, Offset) ->
-  wpool:call(Name, {find_by, DocName, Conditions, Limit, Offset}).
+  wpool_call(Name, {find_by, DocName, Conditions, Limit, Offset}).
 
 %% @doc
 %% Finds documents that match the given conditions in the given
@@ -225,8 +225,7 @@ find_by(Name, DocName, Conditions, Limit, Offset) ->
   Offset     :: non_neg_integer(),
   Res        :: {ok, [sumo_internal:doc()]} | {error, term()}.
 find_by(Name, DocName, Conditions, SortFields, Limit, Offset) ->
-  wpool:call(Name, {find_by, DocName, Conditions, SortFields, Limit, Offset}).
-
+  wpool_call(Name, {find_by, DocName, Conditions, SortFields, Limit, Offset}).
 
 %% @doc Calls a custom function in the given store name.
 -spec call(Name, DocName, Function, Args) -> Res when
@@ -236,12 +235,7 @@ find_by(Name, DocName, Conditions, SortFields, Limit, Offset) ->
   Args     :: [term()],
   Res      :: ok | {ok, term()} | {error, term()}.
 call(Name, DocName, Function, Args) ->
-  {ok, Timeout} = application:get_env(sumo_db, query_timeout),
-  wpool:call(
-    Name,
-    {call, DocName, Function, Args},
-    wpool:default_strategy(),
-    Timeout).
+  wpool_call(Name, {call, DocName, Function, Args}).
 
 %%%=============================================================================
 %%% gen_server callbacks
@@ -364,3 +358,11 @@ terminate(_Reason, _State) ->
 -spec code_change(term(), state(), term()) -> {ok, state()} | {error, term()}.
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
+
+%%%=============================================================================
+%%% Internal functions
+%%%=============================================================================
+
+wpool_call(Name, Call) ->
+  {ok, Timeout} = application:get_env(sumo_db, query_timeout),
+  wpool:call(Name, Call, wpool:default_strategy(), Timeout).
